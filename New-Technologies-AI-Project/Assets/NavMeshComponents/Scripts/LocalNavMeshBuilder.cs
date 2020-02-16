@@ -10,6 +10,7 @@ public class LocalNavMeshBuilder : MonoBehaviour
 {
     // The center of the build
     public Transform m_Tracked;
+    public Vector3 center;
 
     // The size of the build bounds
     public Vector3 m_Size = new Vector3(80.0f, 20.0f, 80.0f);
@@ -23,7 +24,11 @@ public class LocalNavMeshBuilder : MonoBehaviour
     {
         while (true)
         {
+            //Short delay to avoid excessive operations
+            yield return new WaitForSeconds(2);
+
             UpdateNavMesh(true);
+            
             yield return m_Operation;
         }
     }
@@ -33,8 +38,10 @@ public class LocalNavMeshBuilder : MonoBehaviour
         // Construct and add navmesh
         m_NavMesh = new NavMeshData();
         m_Instance = NavMesh.AddNavMeshData(m_NavMesh);
+
         if (m_Tracked == null)
             m_Tracked = transform;
+
         UpdateNavMesh(false);
     }
 
@@ -46,8 +53,18 @@ public class LocalNavMeshBuilder : MonoBehaviour
 
     void UpdateNavMesh(bool asyncUpdate = false)
     {
+        //Don't do anything if the target area hasn't changed
+        if (asyncUpdate && center == (m_Tracked ? m_Tracked.position : transform.position))
+            return;
+        
         NavMeshSourceTag.Collect(ref m_Sources);
         var defaultBuildSettings = NavMesh.GetSettingsByIndex(0);
+
+        defaultBuildSettings.overrideVoxelSize = true;
+        defaultBuildSettings.voxelSize = 0.4f;
+        defaultBuildSettings.overrideTileSize = true;
+        defaultBuildSettings.tileSize = 16;
+        
         var bounds = QuantizedBounds();
 
         if (asyncUpdate)
@@ -67,8 +84,8 @@ public class LocalNavMeshBuilder : MonoBehaviour
     Bounds QuantizedBounds()
     {
         // Quantize the bounds to update only when theres a 10% change in size
-        var center = m_Tracked ? m_Tracked.position : transform.position;
-        return new Bounds(Quantize(center, 0.3175f * m_Size), m_Size);
+        center = m_Tracked ? m_Tracked.position : transform.position;
+        return new Bounds(Quantize(center, 0.1f * m_Size), m_Size);
     }
 
     void OnDrawGizmosSelected()
@@ -78,7 +95,7 @@ public class LocalNavMeshBuilder : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(m_NavMesh.sourceBounds.center, m_NavMesh.sourceBounds.size);
         }
-
+        
         Gizmos.color = Color.yellow;
         var bounds = QuantizedBounds();
         Gizmos.DrawWireCube(bounds.center, bounds.size);

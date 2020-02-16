@@ -4,6 +4,8 @@ using System.Collections;
 
 public class TouchControls : MonoBehaviour
 {
+    static public bool controlsLocked;
+
     public Camera UICamera;
 
     public RawImage joystick;
@@ -16,12 +18,17 @@ public class TouchControls : MonoBehaviour
 
     private float joystickOffset = 1.5f;
     private float joystickSize = 2f;
-    private float speed = 1f;
 
     public IPlayable Playable { get { return GetComponent<IPlayable>(); } }
 
     void Update()
     {
+        if(controlsLocked)
+        {
+            DeactivateJoystick();
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             InitializeJoystick();
@@ -89,5 +96,10 @@ public class TouchControls : MonoBehaviour
     private void RotateCharacter()
     {
         transform.eulerAngles = new Vector3(0, -joystickDirection.transform.eulerAngles.z, 0);
+    }
+
+    static public void LockControls()
+    {
+        controlsLocked = true;
     }
 }

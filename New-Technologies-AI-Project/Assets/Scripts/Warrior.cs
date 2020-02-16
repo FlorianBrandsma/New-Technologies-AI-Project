@@ -3,31 +3,48 @@ using UnityEngine.AI;
 
 public class Warrior : MonoBehaviour, IPlayable
 {
+    private Vector3 startPosition;
+
     public GameObject character;
     public GameObject Character { get { return character; } }
     
-    private NavMeshAgent agent;
+    public NavMeshAgent Agent { get { return GetComponent<NavMeshAgent>(); } }
     private Animator animator;
 
     private float cameraOffset;
 
+    public bool caught;
+
     void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
+        startPosition = transform.position;
+
         animator = GetComponent<Animator>();
+
+        GameManager.warrior = this;
 
         cameraOffset = Camera.main.transform.position.z - transform.position.z;
     }
-    
+
+    public void Update()
+    {
+        if (!TouchControls.controlsLocked) return;
+
+        var walking = Agent.velocity.x != 0 || Agent.velocity.z != 0;
+
+        animator.SetBool("IsWalking", walking);
+        animator.SetFloat("WalkSpeedSensitivity", Agent.speed);
+    }
+
     public void Move(float sensitivity)
     {
-        var speed = agent.speed * sensitivity;
+        var speed = Agent.speed * sensitivity;
 
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
 
         animator.SetBool("IsWalking", true);
-        animator.SetFloat("WalkSpeedSensitivity", sensitivity);
-
+        animator.SetFloat("WalkSpeedSensitivity", speed);
+        
         MoveCameraWithCharacter();
     }
 
@@ -39,5 +56,17 @@ public class Warrior : MonoBehaviour, IPlayable
     public void StopMoving()
     {
         animator.SetBool("IsWalking", false);
+    }
+
+    public void ResetWarrior()
+    {
+        Agent.isStopped = true;
+        Agent.ResetPath();
+
+        caught = false;
+
+        StopMoving();
+        transform.position = startPosition;
+        MoveCameraWithCharacter();
     }
 }
