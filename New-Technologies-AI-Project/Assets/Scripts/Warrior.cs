@@ -3,8 +3,6 @@ using UnityEngine.AI;
 
 public class Warrior : MonoBehaviour, IPlayable
 {
-    private Vector3 startPosition;
-
     public GameObject character;
     public GameObject Character { get { return character; } }
     
@@ -17,8 +15,6 @@ public class Warrior : MonoBehaviour, IPlayable
 
     void Awake()
     {
-        startPosition = transform.position;
-
         animator = GetComponent<Animator>();
 
         GameManager.warrior = this;
@@ -56,17 +52,5 @@ public class Warrior : MonoBehaviour, IPlayable
     public void StopMoving()
     {
         animator.SetBool("IsWalking", false);
-    }
-
-    public void ResetWarrior()
-    {
-        Agent.isStopped = true;
-        Agent.ResetPath();
-
-        caught = false;
-
-        StopMoving();
-        transform.position = startPosition;
-        MoveCameraWithCharacter();
     }
 }

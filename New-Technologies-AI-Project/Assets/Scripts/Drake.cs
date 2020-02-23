@@ -62,14 +62,6 @@ public class Drake : MonoBehaviour
         //animator.keepAnimatorControllerStateOnDisable = true;
     }
 
-    public void ResetDrake()
-    {
-        transform.position = startPosition;
-
-        Agent.isStopped = true;
-        Agent.ResetPath();
-    }
-
     private void InitializeCollider()
     {
         SphereCollider.radius = sightDistance;

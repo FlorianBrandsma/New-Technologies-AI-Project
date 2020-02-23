@@ -55,12 +55,4 @@ public class SkullManager : MonoBehaviour
         else
             uptime -= 1 * Time.deltaTime;
     }
-
-    public void ResetSkulls()
-    {
-        RectTransform.anchoredPosition = startAnchor;
-
-        skullIcons.ForEach(x => x.texture = defaultIcon);
-        skulls.ForEach(x => x.ResetSkull());
-    }
 }

@@ -34,6 +34,8 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+        StopAllCoroutines();
+
         started = true;
         StartCoroutine(Fade(fadeImage, 0, 2));
     }
@@ -72,14 +74,6 @@ public class GameManager : MonoBehaviour
 
         letterbox.Deactivate();
 
-        skullManager.ResetSkulls();
-        warrior.ResetWarrior();
-
-        drakes.ForEach(x =>
-        {
-            x.GetComponent<Drake>().ResetDrake();
-        });
-
         yield return new WaitForSeconds(1);
         
         gameFinished = false;
@@ -92,11 +86,11 @@ public class GameManager : MonoBehaviour
     {
         if (articifialDelay > 0)
             articifialDelay -= 1 * Time.deltaTime;
-        else if(!started)
+        else if (!started)
             StartGame();
 
         if (!finishFinished) return;
-        
+
         if (Input.GetMouseButtonUp(0))
         {
             StartCoroutine(ResetGame());
